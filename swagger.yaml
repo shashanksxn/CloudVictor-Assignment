@@ -1,0 +1,1123 @@
+openapi: 3.0.3
+info:
+  title: Therapist-Client Platform API
+  description: API for connecting clients and therapists, managing journals, sessions, messaging, and relationships.
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+
+tags:
+  - name: Auth
+    description: Registration and authentication
+  - name: Users
+    description: Current user profile
+  - name: Therapists
+    description: Therapist profile management
+  - name: Clients
+    description: Client profile management
+  - name: Relationships
+    description: Connection requests and relationships between clients and therapists
+  - name: Journal Access
+    description: Therapist requests to access client journals
+  - name: Journal Entries
+    description: Client journal entries
+  - name: Messaging
+    description: Conversations and messages
+  - name: Sessions
+    description: Therapy session scheduling
+  - name: Session Requests
+    description: Client-initiated session requests
+  - name: Session Notes
+    description: Notes created by therapists for sessions
+
+paths:
+
+  # ──────────────────────────────
+  # AUTH
+  # ──────────────────────────────
+
+  /auth/client/register:
+    post:
+      tags: [Auth]
+      summary: Register a new client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Client registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientId:
+                    type: string
+
+  /auth/therapist/register:
+    post:
+      tags: [Auth]
+      summary: Register a new therapist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Therapist registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  therapistId:
+                    type: string
+
+  /auth/client/login:
+    post:
+      tags: [Auth]
+      summary: Client login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /auth/therapist/login:
+    post:
+      tags: [Auth]
+      summary: Therapist login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current user
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logged out
+
+  # ──────────────────────────────
+  # CURRENT USER
+  # ──────────────────────────────
+
+  /me:
+    get:
+      tags: [Users]
+      summary: Get logged-in user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  # ──────────────────────────────
+  # THERAPISTS
+  # ──────────────────────────────
+
+  /therapists:
+    get:
+      tags: [Therapists]
+      summary: Search / list therapists
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of therapists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TherapistSummary'
+
+  /therapists/{therapistId}:
+    get:
+      tags: [Therapists]
+      summary: Get therapist profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/therapistId'
+      responses:
+        '200':
+          description: Therapist profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Therapist'
+    patch:
+      tags: [Therapists]
+      summary: Update therapist profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/therapistId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+
+  # ──────────────────────────────
+  # CLIENTS
+  # ──────────────────────────────
+
+  /clients:
+    get:
+      tags: [Clients]
+      summary: Search / list clients
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientSummary'
+
+  /clients/{clientId}:
+    get:
+      tags: [Clients]
+      summary: Get client profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+      responses:
+        '200':
+          description: Client profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+    patch:
+      tags: [Clients]
+      summary: Update client profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+
+  /clients/{clientId}/journal-entries:
+    get:
+      tags: [Journal Entries]
+      summary: Therapist views client journal entries (requires granted access)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+      responses:
+        '200':
+          description: Client journal entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JournalEntry'
+        '403':
+          description: Access not granted
+
+  # ──────────────────────────────
+  # RELATIONSHIP REQUESTS
+  # ──────────────────────────────
+
+  /requests:
+    post:
+      tags: [Relationships]
+      summary: Create a connection request (client or therapist)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiverId, senderType]
+              properties:
+                receiverId:
+                  type: string
+                senderType:
+                  type: string
+                  enum: [client, therapist]
+      responses:
+        '201':
+          description: Request created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId:
+                    type: string
+    get:
+      tags: [Relationships]
+      summary: View my connection requests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Request'
+
+  /requests/{requestId}:
+    get:
+      tags: [Relationships]
+      summary: View a single connection request
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '200':
+          description: Request details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+    patch:
+      tags: [Relationships]
+      summary: Approve or reject a connection request
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [approved, rejected]
+      responses:
+        '200':
+          description: Request updated
+    delete:
+      tags: [Relationships]
+      summary: Cancel a pending connection request
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '204':
+          description: Request cancelled
+
+  # ──────────────────────────────
+  # RELATIONSHIPS
+  # ──────────────────────────────
+
+  /relationships:
+    get:
+      tags: [Relationships]
+      summary: View connected clients/therapists
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of relationships
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+
+  /relationships/{relationshipId}:
+    delete:
+      tags: [Relationships]
+      summary: Remove a relationship (disconnect)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/relationshipId'
+      responses:
+        '204':
+          description: Relationship removed
+
+  # ──────────────────────────────
+  # JOURNAL ACCESS REQUESTS
+  # ──────────────────────────────
+
+  /journal-access-requests:
+    post:
+      tags: [Journal Access]
+      summary: Therapist requests access to a client's journal
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clientId]
+              properties:
+                clientId:
+                  type: string
+      responses:
+        '201':
+          description: Access request created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId:
+                    type: string
+    get:
+      tags: [Journal Access]
+      summary: View my journal access requests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of journal access requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Request'
+
+  /journal-access-requests/{requestId}:
+    patch:
+      tags: [Journal Access]
+      summary: Approve or reject a journal access request
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [approved, rejected]
+      responses:
+        '200':
+          description: Request updated
+
+  # ──────────────────────────────
+  # JOURNAL ENTRIES
+  # ──────────────────────────────
+
+  /journal-entries:
+    post:
+      tags: [Journal Entries]
+      summary: Create a journal entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JournalEntryRequest'
+      responses:
+        '201':
+          description: Entry created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entryId:
+                    type: string
+    get:
+      tags: [Journal Entries]
+      summary: View own journal entries
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of journal entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JournalEntry'
+
+  /journal-entries/{entryId}:
+    get:
+      tags: [Journal Entries]
+      summary: View a single journal entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/entryId'
+      responses:
+        '200':
+          description: Journal entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalEntry'
+    patch:
+      tags: [Journal Entries]
+      summary: Edit a journal entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/entryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JournalEntryRequest'
+      responses:
+        '200':
+          description: Entry updated
+    delete:
+      tags: [Journal Entries]
+      summary: Delete a journal entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/entryId'
+      responses:
+        '204':
+          description: Entry deleted
+
+  # ──────────────────────────────
+  # MESSAGING
+  # ──────────────────────────────
+
+  /messages:
+    post:
+      tags: [Messaging]
+      summary: Send a message
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiverId, message]
+              properties:
+                receiverId:
+                  type: string
+                message:
+                  type: string
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messageId:
+                    type: string
+
+  /conversations:
+    get:
+      tags: [Messaging]
+      summary: List conversations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conversation'
+
+  /conversations/{conversationId}/messages:
+    get:
+      tags: [Messaging]
+      summary: View messages in a conversation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/conversationId'
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+
+  # ──────────────────────────────
+  # SESSIONS
+  # ──────────────────────────────
+
+  /sessions:
+    post:
+      tags: [Sessions]
+      summary: Therapist creates a session
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [datetime]
+              properties:
+                datetime:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+    get:
+      tags: [Sessions]
+      summary: View sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+
+  /sessions/{sessionId}:
+    get:
+      tags: [Sessions]
+      summary: View a single session
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/sessionId'
+      responses:
+        '200':
+          description: Session details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+    patch:
+      tags: [Sessions]
+      summary: Update a session
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/sessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                datetime:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Session updated
+    delete:
+      tags: [Sessions]
+      summary: Delete a session
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/sessionId'
+      responses:
+        '204':
+          description: Session deleted
+
+  # ──────────────────────────────
+  # SESSION REQUESTS
+  # ──────────────────────────────
+
+  /session-requests:
+    post:
+      tags: [Session Requests]
+      summary: Client requests a session
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionId]
+              properties:
+                sessionId:
+                  type: string
+      responses:
+        '201':
+          description: Session request created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId:
+                    type: string
+    get:
+      tags: [Session Requests]
+      summary: View session requests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of session requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Request'
+
+  /session-requests/{requestId}:
+    patch:
+      tags: [Session Requests]
+      summary: Approve or reject a session request
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [approved, rejected]
+      responses:
+        '200':
+          description: Request updated
+    delete:
+      tags: [Session Requests]
+      summary: Cancel a session request
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '204':
+          description: Request cancelled
+
+  # ──────────────────────────────
+  # SESSION NOTES
+  # ──────────────────────────────
+
+  /sessions/{sessionId}/notes:
+    post:
+      tags: [Session Notes]
+      summary: Therapist creates a session note
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/sessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteRequest'
+      responses:
+        '201':
+          description: Note created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  noteId:
+                    type: string
+    get:
+      tags: [Session Notes]
+      summary: View notes for a session (therapist sees all; client sees shared notes)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/sessionId'
+      responses:
+        '200':
+          description: List of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+
+  /sessions/{sessionId}/notes/{noteId}:
+    patch:
+      tags: [Session Notes]
+      summary: Edit a session note
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/sessionId'
+        - $ref: '#/components/parameters/noteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteRequest'
+      responses:
+        '200':
+          description: Note updated
+    delete:
+      tags: [Session Notes]
+      summary: Delete a session note
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/sessionId'
+        - $ref: '#/components/parameters/noteId'
+      responses:
+        '204':
+          description: Note deleted
+
+# ──────────────────────────────────────────────────────
+# COMPONENTS
+# ──────────────────────────────────────────────────────
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    therapistId:
+      name: therapistId
+      in: path
+      required: true
+      schema:
+        type: string
+    clientId:
+      name: clientId
+      in: path
+      required: true
+      schema:
+        type: string
+    requestId:
+      name: requestId
+      in: path
+      required: true
+      schema:
+        type: string
+    relationshipId:
+      name: relationshipId
+      in: path
+      required: true
+      schema:
+        type: string
+    entryId:
+      name: entryId
+      in: path
+      required: true
+      schema:
+        type: string
+    conversationId:
+      name: conversationId
+      in: path
+      required: true
+      schema:
+        type: string
+    sessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+    noteId:
+      name: noteId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [client, therapist]
+
+    TherapistSummary:
+      type: object
+      properties:
+        therapistId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+
+    Therapist:
+      allOf:
+        - $ref: '#/components/schemas/TherapistSummary'
+
+    ClientSummary:
+      type: object
+      properties:
+        clientId:
+          type: string
+        name:
+          type: string
+
+    Client:
+      allOf:
+        - $ref: '#/components/schemas/ClientSummary'
+        - type: object
+          properties:
+            email:
+              type: string
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    Request:
+      type: object
+      properties:
+        requestId:
+          type: string
+        senderId:
+          type: string
+        receiverId:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected, cancelled]
+        createdAt:
+          type: string
+          format: date-time
+
+    Relationship:
+      type: object
+      properties:
+        relationshipId:
+          type: string
+        clientId:
+          type: string
+        therapistId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    JournalEntryRequest:
+      type: object
+      required: [time, feeling, intensity]
+      properties:
+        time:
+          type: string
+          format: date-time
+        feeling:
+          type: string
+        intensity:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    JournalEntry:
+      allOf:
+        - $ref: '#/components/schemas/JournalEntryRequest'
+        - type: object
+          properties:
+            entryId:
+              type: string
+            clientId:
+              type: string
+
+    Conversation:
+      type: object
+      properties:
+        conversationId:
+          type: string
+        participantIds:
+          type: array
+          items:
+            type: string
+        lastMessage:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      properties:
+        messageId:
+          type: string
+        senderId:
+          type: string
+        message:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+
+    Session:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        therapistId:
+          type: string
+        datetime:
+          type: string
+          format: date-time
+
+    NoteRequest:
+      type: object
+      required: [note, access]
+      properties:
+        note:
+          type: string
+        access:
+          type: string
+          enum: [private, shared]
+          description: '"shared" makes the note visible to the client'
+
+    Note:
+      allOf:
+        - $ref: '#/components/schemas/NoteRequest'
+        - type: object
+          properties:
+            noteId:
+              type: string
+            sessionId:
+              type: string
+            therapistId:
+              type: string
+            createdAt:
+              type: string
+              format: date-time

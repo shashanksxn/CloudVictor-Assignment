@@ -1,0 +1,11 @@
+table,partition key,created (sk),attributes,,,,,notes
+client,client id,created,updated,name,email,password,,
+therapist,therapist id,created,updated,name,email,password,,
+client therapist map,,created,updated,client id,therapist id,journal access,,not keeping a track of mapping start and end ; journal access start and end
+journal,entry id,created,updated,client id,time,feeling,intensity,
+messages,message id,created,updated,client id,therapist id,message body,,not keeping track of seen unseen
+session notes,note id,created,updated,session id,note body,client access,,
+session,session id,created,updated,therapist id,datetime,client id,status,"status: done, pending"
+session requests,,created,updated,session id,client id,status,,
+requests,request id,created,updated,client id,therapist id,status,initiator,"0 = client, 1 = therapist"
+journal requests,,created,updated,client id,therapist id,status,,
