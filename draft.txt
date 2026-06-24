@@ -1,0 +1,375 @@
+
+
+
+
+clientsTable
+    query("email")
+    query("clientId")
+therapistsTable
+    query("email")
+    query("therapistId")
+mappingsTable
+    query("clientId")
+    queryAll('clientId', 'request')
+    query("therapistId")
+    queryAll('therapistId', 'request')
+messagesTable
+    queryAll('mappingId')
+sessionsTable
+    queryAll("clientId", type = 'session') : array(sessionId, datetime, therapistId, cliendId, mark)
+    queryAll("therapistId", type = 'slot') : array(sessionId, datetime, therapistId)
+    queryAll("therapistId", type = 'session')
+    query('therapistId', 'datetime')
+    query('slotId', 'slot') : therapistId
+notesTables
+journalTable
+sessionRequestsTable
+    .queryAll(slotId)
+    .queryAll('requestId')
+Client
+
+
+/clients
+    POST
+        body: name, email, password
+        validity check:
+            error: "Fields Missing" or "Invalid Fields"
+        if clientsTable.query("email"):
+            error: "Email already exists"
+        else:
+            clientId = generateId()
+            clientsTable.add(clientId, username, email, password)
+            return "New account created. Id = {clientId}"
+    GET
+        clientsTable.queryAll()
+        return array(Client)
+
+/clients/{clientId}
+    GET
+        if clientsTable.query("clientId")
+            return Client
+        else
+            error: "Not Found"
+    DELETE
+        if clientsTable.query("clientId")
+            clientsTable.delete("clientId")
+            return "Deleted Successfully"
+        else
+            error: "Not Found"
+    PATCH
+        body: name, email, password
+        if clientsTable.query("clientId")
+            validity check:
+                error: "Invalid Fields"
+            clientsTable.update("clientId")
+            return "Changed Successfully"
+        else:
+            error: "Not Found"
+
+/clients/{clientId}/requests
+    POST
+        body: therapistId
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        if not therapistsTable.query("therapistId")
+            error: "Therapist Not Found"
+        if mappingsTable.query("clientId")
+            error: "Mapping already exists"
+        else:
+            mappingId = generateId()
+            type = 'request'
+            clientId = {clientId}
+            therapistId = {therapistId}
+            requestedBy = 'client'
+            journalAccess = 'no'
+            mappingsTable.add(Mapping)
+
+    GET
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        mappingsTable.queryAll('clientId', 'request')
+        return array(Mapping)  // CUSTOMIZED
+
+/clients/{clientId}/requests/{requestId}
+    DELETE
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        if mappingsTable.query(mappingId = 'requestId')
+            if type = 'mapping':
+                error: "invalid request"
+            if clientId != {clientId}
+                error: "Not Authorized" // not allowed to delete if not his
+            mappingsTable.delete({"requestId"})
+            return "Deleted Succfully"
+        else
+            error "Not Found"
+
+/clients/{clientId}/mappings
+    GET
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        mappingsTable.queryAll('clientId', 'mapping')
+        return array(Mapping)  // CUSTOMIZED
+
+/clients/{clientId}/mappings/{mappingId}
+    DELETE
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if clientId != {clientId}
+            error: "Not Authorized" // not allowed to delete if not his
+        mappingsTable.delete(mappingId)
+        return "Deleted Successfully"
+
+/therapists
+    POST
+        body: name, email, password
+        validity check:
+            error: "Fields Missing" or "Invalid Fields"
+        if therapistsTable.query("email"):
+            error: "Email already exists"
+        else:
+            therapistId = generateId()
+            therapistsTable.add(therapistId, username, email, password)
+            return "New account created. Id = {therapistId}"
+    GET
+        therapistsTable.queryAll()
+        return array(therapist)
+
+/therapists/{therapistId}
+    GET
+        if therapistsTable.query("therapistId")
+            return therapist
+        else
+            error: "Not Found"
+    DELETE
+        if therapistsTable.query("therapistId")
+            therapistsTable.delete("therapistId")
+            return "Deleted Successfully"
+        else
+            error: "Not Found"
+    PATCH
+        body: name, email, password
+        if therapistsTable.query("therapistId")
+            validity check:
+                error: "Invalid Fields"
+            therapistsTable.update("therapistId")
+            return "Changed Successfully"
+        else:
+            error: "Not Found"
+
+/therapists/{therapistId}/requests
+    POST
+        body: clientId
+        if not therapistsTable.query(therapistId)
+            error: "therapist Not Found"
+        if not clientsTable.query("clientId")
+            error: "client Not Found"
+        if mappingsTable.query("therapistId")
+            error: "Mapping already exists"
+        else:
+            mappingId = generateId()
+            type = 'request'
+            therapistId = {therapistId}
+            clientId = {clientId}
+            requestedBy = 'therapist'
+            journalAccess = 'no'
+            mappingsTable.add(Mapping)
+
+    GET
+        if not therapistsTable.query(therapistId)
+            error: "therapist Not Found"
+        mappingsTable.queryAll('therapistId', 'request')
+        return array(Mapping)  // CUSTOMIZED
+
+/therapists/{therapistId}/requests/{requestId}
+    DELETE
+        if not therapistsTable.query(therapistId)
+            error: "therapist Not Found"
+        if mappingsTable.query(mappingId = 'requestId')
+            if type = 'mapping':
+                error: "invalid request"
+            if therapistId != {therapistId}
+                error: "Not Authorized" // not allowed to delete if not his
+            mappingsTable.delete({"requestId"})
+            return "Deleted Succfully"
+        else
+            error "Not Found"
+
+/therapists/{therapistId}/mappings
+    GET
+        if not therapistsTable.query(therapistId)
+            error: "therapist Not Found"
+        mappingsTable.queryAll('therapistId', 'mapping')
+        return array(Mapping)  // CUSTOMIZED
+
+/therapists/{therapistId}/mappings/{mappingId}
+    DELETE
+        if not therapistsTable.query(therapistId)
+            error: "therapist Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if therapistId != {therapistId}
+            error: "Not Authorized" // not allowed to delete if not his
+        mappingsTable.delete(mappingId)
+        return "Deleted Successfully"
+
+/clients/{clientId}/mappings/{mappingId}/messages
+    POST
+        body: body
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if clientId != {clientId}
+            error: "Not Authorized" // not allowed to delete if not his
+        mappingId = {mappingId}
+        timestamp = {current time}
+        sender = 'client'
+        body = 'body'
+        messagesTable.add(Message)
+
+    GET
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if clientId != {clientId}
+            error: "Not Authorized" // not allowed to delete if not his
+        messagesTable.queryAll('mappingId')
+        return array(Message)
+
+/therapists/{therapistId}/mappings/{mappingId}/messages
+    POST
+        body: body
+        if not therapistTable.query(therapistId)
+            error: "Therapist Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if therapistId != {therapistId}
+            error: "Not Authorized" // not allowed to delete if not his
+        mappingId = {mappingId}
+        timestamp = {current time}
+        sender = 'client'
+        body = 'body'
+        messagesTable.add(Message)
+
+    GET
+        if not therapistTable.query(therapistId)
+            error: "Client Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if therapistId != {therapistId}
+            error: "Not Authorized" // not allowed to delete if not his
+        messagesTable.queryAll('mappingId')
+        return array(Message)
+
+/clients/{clientId}/mappings/{mappingId}/slots
+    GET
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if clientId != {clientId}
+            error: "Not Authorized" // not allowed to delete if not his
+        sessionsTable.queryAll(therapistId, 'slot')
+        array(sessionId, datetime)
+
+/clients/{clientId}/mappings/{mappingId}/slots/{slotId}
+    POST
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if clientId != {clientId}
+            error: "Not Authorized" // not allowed to delete if not his
+        if not sessionsTable.queryAll(slotId, 'slot')
+            error: "Not found"
+
+        requestId = generateId()
+        timestamp = {current time}
+        clientId = {clientId}
+        sessionsId = {slotId}
+        sessionReqeustsTable.add(SessionRequest)
+
+/clients/{clientId}/mappings/{mappingId}/journal-access
+    PATCH
+        {journalAccess: 'yes', 'no'}
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        if not mappingsTable.query(mappingId):
+            error: "Mapping Id Not Found"
+        if clientId != {clientId}
+            error: "Not Authorized" // not allowed to delete if not his
+        mappingsTable.update(mappingId, journalAccess)
+
+/clients/{clientId}/sessions
+    GET
+        if not clientsTable.query(clientId)
+            error: "Client Not Found"
+        sessionsTable.queryAll("clientId", type = 'session')
+        return array(sessionId, datetime, therapistId, cliendId, mark)
+
+/therapists/{therapistsId}/sessions
+    GET
+        if not therapistsTable.query(therapistId)
+            error: "Therapist Not Found"
+        sessionsTable.queryAll("therapistId", type = 'session')
+        return array(sessionId, datetime, therapistId, cliendId, mark)
+
+/therapists/{therapistId}/slots
+    POST
+        body: datetime
+        if datetime < now:
+            error: "Invalid Time: time cannot be in the past"
+        if not therapistsTable.query(therapistId)
+            error: "Therapist Not Found"
+        if sessionsTable.query('therapistId', 'datetime')
+            error: "Entry already exists"
+        sessionId = generateId
+        datetime = {datetime}
+        therapistId = {therapistId}
+        type = 'slot'
+        sessionsTable.add(Session)
+        return "Created Successfully"
+
+    GET
+        if not therapistTable.query(therapistId)
+            error: "Client Not Found"
+        sessionsTable.query('therapistId', 'slot')
+        return array(sessionId, datetime)
+
+/therapists/{therapistId}/slots/{slotId}
+    DELETE
+        if not therapistsTable.query(therapistId)
+            error: "Therapist Not Found"
+        if not sessionsTable.query('slotId', 'slot')
+            error: "Slot not found"
+        if therapistId != {therapistId}
+            error: "Not Authorized"
+        sessionsTable.delete(slotId)
+
+/therapists/{therapistId}/slots/{slotId}/requests
+    GET
+        if not therapistsTable.query(therapistId)
+            error: "Therapist Not Found"
+        if not sessionsTable.query('slotId', 'slot')
+            error: "Slot not found"
+        if therapistId != {therapistId}
+            error: "Not Authorized"
+        sessionRequestsTable.queryAll(slotId)
+        return array(clientId, name)
+
+/therapists/{therapistId}/slots/{slotId}/requests/{requestId}
+    PATCH
+        if not therapistsTable.query(therapistId)
+            error: "Therapist Not Found"
+        if not sessionsTable.query('slotId', 'slot')
+            error: "Slot not found"
+        if therapistId != {therapistId}
+            error: "Not Authorized"
+        if not sessionRequestsTable.queryAll('requestId')
+            error: "Not Found"
+        clientId = query.clientId
+        sessionsTable.update(clientId, 'session')

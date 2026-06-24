@@ -1,0 +1,32 @@
+,API,POST,GET,DELETE,PATCH
+✅,/clients,"register a client {name, email, password}",get a list of all clients,–,–
+✅,/clients/{clientId},–,get id data,delete id,"edit id details {name, email, password}"
+✅,/clients/{clientId}/requests,request a therapist {therapist id},view sent or received requests,–,–
+✅,/clients/{clientId}/requests/{requestId},–,+,reject or delete a request,–
+✅,/clients/{clientId}/mappings,–,view mapped therapists,–,–
+✅,/clients/{clientId}/mappings/{mappingId},–,+,remove a therapist,–
+✅,/clients/{clientId}/mappings/{mappingId}/messages,"message a therapist {time, body}",get conversation history,–,–
+✅,/clients/{clientId}/mappings/{mappingId}/journal-access,–,++,–,change status {access}
+✅,/clients/{clientId}/mappings/{mappingId}/slots,–,get a list of available slots,–,–
+✅,/clients/{clientId}/mappings/{mappingId}/slots/{slotId},request for slot,–,–,–
+❌,/clients/{cliendId}/journal,"write a journal entry {time, emotion, intensity}",view past entries,–,–
+❌,/clients/{cliendId}/journal/{journal id},–,view entry,delete entry,edit entry
+✅,/clients/{clientId}/sessions,–,get a list of past sessions,?,–
+❌,/clients/{clientId}/sessions/{sessionId},–,++,–,–
+❌,/clients/{clientId}/sessions/{sessionId}/notes,–,get list of notes for that session,–,–
+✅,/therapists,"register a therapist {name, email, password}",get a list of all therapists,–,–
+✅,/therapists/{therapistsId},–,get id data,delete id,"edit id details {name, email, password}"
+✅,/therapists/{therapistsId}/requests,request a client {therapist id},view sent or received requests,–,–
+✅,/therapists/{therapistsId}/requests/{requestId},–,+,reject or delete a request,–
+✅,/therapists/{therapistsId}/mappings,–,view mapped clients,–,–
+✅,/therapists/{therapistsId}/mappings/{mappingId},–,+,remove a client,–
+✅,/therapists/{therapistsId}/mappings/{mappingId}/messages,"message a client {time, body}",get conversation history,–,–
+❌,/therapists/{therapistsId}/mappings/{mappingId}/journal,–,view client journal,–,–
+✅,/therapists/{therapistsId}/sessions,–,get a list of sessions,–,–
+❌,/therapists/{therapistId}/sessions/{sessionId},–,++,–,–
+❌,/therapists/{therapistsId}/sessions/{sessionId}/notes,"add session notes {body, access}",view session notes,–,–
+❌,/therapists/{therapistsId}/sessions/{sessionId}/notes/{noteId},–,view session note,delete a note,"edit a note {body, access}"
+✅,/therapists/{therapistsId}/slots,create an appointment slot {datetime},get slots,–,–
+✅,/therapists/{therapistsId}/slots/{slotId},–,+,delete an slot,NOT ALLOWED
+✅,/therapists/{therapistsId}/slots/{slotId}/requests,–,get appointment requests,–,–
+✅,/therapists/{therapistsId}/slots/{slotId}/requests/{requestId},–,+,++,accept a request

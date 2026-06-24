@@ -1,0 +1,10 @@
+,table,pk,sk,,,,
+❌,logins,token,userId,userType,timestamp,,
+✅,clients,clientId,email (gsi1),name,password,,
+✅,therapists,therapistId,email (gsi1),name,password,,
+✅,mappings,mappingid,"type = mapping, request",client id (gsi1),therapist id (gsi2),requestedBy,journal access
+✅,messages,mapping id,timestamp,"sender = client, therapist",body,,
+✅,sessions,session id,datetime,client id (gsi1),therapist id (gsi 2),"type = session, slot","mark = present, absent"
+✅,session requests,requestId,timestamp,clientId,session id,,
+❌,notes,session id,timestamp,note,"access = private, client",,
+❌,journal,client id,timestamp,emotion,intensity,,
