@@ -1,5 +1,4 @@
-**api.csv:** the api paths
-'–' means not required, '+' and '++' means can be added in the future, 'NOT ALLOWED' means it is intentionally not allowed
+**api.csv:** the api paths. In it '–' means not required, '+' and '++' means can be added in the future, 'NOT ALLOWED' means it is intentionally not allowed. Rest are created APIs. ✅ means implementation was required and ❌ means implementation wasn't.
 
 **schema.csv:** schema for the DynamoDB
 
