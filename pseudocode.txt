@@ -1,7 +1,3 @@
-
-
-
-
 clientsTable
     query("email")
     query("clientId")
@@ -26,8 +22,7 @@ journalTable
 sessionRequestsTable
     .queryAll(slotId)
     .queryAll('requestId')
-Client
-
+-------------------------------------------------------------------------------------------------------------------------
 
 /clients
     POST
