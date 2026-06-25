@@ -38,9 +38,9 @@ Client can view his past sessions and shared notes in the session.
 The main assumption the users aren't malicious entity actively trying to deceive the system. For that a lot of guardrails would have to be put in check.
 
 ## Did you learn anything new while doing this assignment? Please explain.
-It was a really insightful assignment for. Irrespective of the outome, I've learnt a lot. I was introduced to a lot of new concepts like REST APIs, OpenAPI structure, swagger documentation, AWS as service, CLI version of AWS, using AWS CDK to create and deploy models, serverless databases, NoSQL databases and how do they function, testing APIs, testing APIs using Postman. And also practically using Git. And Java app structure, maven, springboot, concept of pom.xml.
+It was a really insightful assignment for. Irrespective of the outome, I've learnt a lot. I was introduced to a lot of new concepts like REST APIs, OpenAPI structure, swagger documentation, AWS as service, CLI version of AWS, using AWS CDK to create and deploy models, serverless databases, NoSQL databases and how do they function, testing APIs, testing APIs using Postman. And also practically using Git. And Java app structure, maven, springboot, concept of pom.xml. And developped my own approach to tackle the problem.
 
-The only regret I have is taking to much time for the assignment. I feel had I been introduced to even some concepts before, I would made the assignment much faster and better.
+The only regret I have is taking too much time for the assignment. I feel had I been introduced to even some concepts before, I would made the assignment much faster and better.
 
 ## If you had more time, what enhancements will you make?
 - User log in and authentication hasn't been implemented due to lack of time
