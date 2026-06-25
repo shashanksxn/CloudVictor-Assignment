@@ -35,7 +35,7 @@ Therapist can create private or shared notes in the sessions. And mark present/a
 Client can view his past sessions and shared notes in the session.
 
 ## Assumptions you have made for this project?
-The main assumption the users aren't malicious entity actively trying to deceive the system. For that a lot of guardrails would have to be put in check.
+The main assumption the users aren't malicious entity actively trying to deceive the system. For that a lot of guardrails would have to be put in check. (I am not able get what is meant by 'assumptions'.)
 
 ## Did you learn anything new while doing this assignment? Please explain.
 It was a really insightful assignment for. Irrespective of the outome, I've learnt a lot. I was introduced to a lot of new concepts like REST APIs, OpenAPI structure, swagger documentation, AWS as service, CLI version of AWS, using AWS CDK to create and deploy models, serverless databases, NoSQL databases and how do they function, testing APIs, testing APIs using Postman. And also practically using Git. And Java app structure, maven, springboot, concept of pom.xml. And developped my own approach to tackle the problem.
